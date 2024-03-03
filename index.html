@@ -101,7 +101,7 @@
         display: none;
       "
     ></div>
-    <div class="assigModalWrapper">
+    <!-- <div class="assigModalWrapper">
       <div class="assigModal">
         <div class="colorBoxesWrapper"></div>
         <div class="input-wrapper"></div>
@@ -118,7 +118,7 @@
           Assign
         </button>
       </div>
-    </div>
+    </div> -->
     <button class="selectRow">Satır Seç</button>
     <div class="selectRowWrapper" style="display: none">
       <div
@@ -140,7 +140,7 @@
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
       const uniqueHexColors = {};
-
+      let color = "";
       // rgb to hex
       function rgbToHex(r, g, b) {
         const toHex = (c) => {
@@ -236,10 +236,11 @@
             singlePix.classList.add("singlePix");
             singlePix.style.width = `${image.width / 58}px`;
             singlePix.style.height = `${image.height / 100}px`;
-            singlePix.style.backgroundColor = hexColor;
+            singlePix.style.background = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
             singlePix.setAttribute("xPos", xPos);
             singlePix.setAttribute("yPos", yPos);
             singlePix.addEventListener("click", (e) => {
+              color = getComputedStyle(e.target).background;
               const wrapper = document.querySelector(".customizeWrapper");
               wrapper.style.display = "flex";
               const inp = document.querySelector(".newValueInp");
@@ -247,9 +248,16 @@
               inp.addEventListener("input", (evt) => {
                 newVal = evt.target.value;
               });
+
               const done = document.querySelector(".doneBtn");
+              const boxes = document.querySelectorAll(".singlePix");
               done.addEventListener("click", () => {
-                e.target.innerHTML = newVal;
+                boxes.forEach((box) => {
+                  if (getComputedStyle(box).background === color) {
+                    console.log(color, getComputedStyle(box).background);
+                    box.innerHTML = newVal;
+                  }
+                });
                 wrapper.style.display = "none";
               });
             });
@@ -259,27 +267,27 @@
           xPos = 1;
           yPos++;
         }
-        let hexCodeArray = Object.keys(uniqueHexColors);
-        console.log(hexCodeArray);
-        let spliceStartValue = 0;
-        let deltaValueComparer = 10;
-        while (hexCodeArray.length > 13) {
-          spliceStartValue = 0;
-          deltaValueComparer += 2;
-          for (let i = 0; i < hexCodeArray.length; i++) {
-            let spliceEndValue = i === 0 ? i + 1 : i;
-            const deltaValue = differenceBetweenTwoColor(
-              chroma(hexCodeArray[spliceStartValue]),
-              chroma(hexCodeArray[spliceEndValue])
-            );
-            if (deltaValue < deltaValueComparer) {
-              delete uniqueHexColors[hexCodeArray[i]];
-              hexCodeArray = Object.keys(uniqueHexColors);
-            } else {
-              spliceStartValue = i;
-            }
-          }
-        }
+        // let hexCodeArray = Object.keys(uniqueHexColors);
+        // console.log(hexCodeArray);
+        // let spliceStartValue = 0;
+        // let deltaValueComparer = 10;
+        // while (hexCodeArray.length > 13) {
+        //   spliceStartValue = 0;
+        //   deltaValueComparer += 2;
+        //   for (let i = 0; i < hexCodeArray.length; i++) {
+        //     let spliceEndValue = i === 0 ? i + 1 : i;
+        //     const deltaValue = differenceBetweenTwoColor(
+        //       chroma(hexCodeArray[spliceStartValue]),
+        //       chroma(hexCodeArray[spliceEndValue])
+        //     );
+        //     if (deltaValue < deltaValueComparer) {
+        //       delete uniqueHexColors[hexCodeArray[i]];
+        //       hexCodeArray = Object.keys(uniqueHexColors);
+        //     } else {
+        //       spliceStartValue = i;
+        //     }
+        //   }
+        // }
 
         // deltaValueComparer += 1;
 
@@ -287,39 +295,39 @@
         // console.log(Object.keys(uniqueHexColors).length);
         const colorBoxWrapper = document.querySelector(".colorBoxesWrapper");
         const inputsWrapper = document.querySelector(".input-wrapper");
-        for (let i = 0; i < hexCodeArray.length; i++) {
-          const colorBox = document.createElement("div");
-          colorBox.classList.add("colorBox");
-          colorBox.style.display = "flex";
-          colorBox.style.backgroundColor = hexCodeArray[i];
-          colorBoxWrapper.appendChild(colorBox);
-          const assignInput = document.createElement("input");
-          assignInput.id = hexCodeArray[i];
-          assignInput.classList.add("assignInput");
-          inputsWrapper.appendChild(assignInput);
-          assignInput.addEventListener("input", (e) => {
-            uniqueHexColors[hexCodeArray[i]] = e.target.value;
-          });
-        }
-        const btn = document.querySelector(".assignBtn");
-        const modal = document.querySelector(".assigModalWrapper");
-        const colorBoxes = document.querySelectorAll(".singlePix");
-        btn.addEventListener("click", () => {
-          modal.style.display = "none";
-          colorBoxes.forEach((box) => {
-            const rgbColor = getComputedStyle(box).backgroundColor;
-            for (let i = 0; i < Object.keys(uniqueHexColors).length; i++) {
-              const deltaValue = differenceBetweenTwoColor(
-                chroma(`${rgbColor}`),
-                chroma(Object.keys(uniqueHexColors)[i])
-              );
-              if (deltaValue < 17) {
-                box.innerHTML =
-                  uniqueHexColors[Object.keys(uniqueHexColors)[i]];
-              }
-            }
-          });
-        });
+        // for (let i = 0; i < hexCodeArray.length; i++) {
+        //   const colorBox = document.createElement("div");
+        //   colorBox.classList.add("colorBox");
+        //   colorBox.style.display = "flex";
+        //   colorBox.style.backgroundColor = hexCodeArray[i];
+        //   colorBoxWrapper.appendChild(colorBox);
+        //   const assignInput = document.createElement("input");
+        //   assignInput.id = hexCodeArray[i];
+        //   assignInput.classList.add("assignInput");
+        //   inputsWrapper.appendChild(assignInput);
+        //   assignInput.addEventListener("input", (e) => {
+        //     uniqueHexColors[hexCodeArray[i]] = e.target.value;
+        //   });
+        // }
+        // const btn = document.querySelector(".assignBtn");
+        // const modal = document.querySelector(".assigModalWrapper");
+        // const colorBoxes = document.querySelectorAll(".singlePix");
+        // btn.addEventListener("click", () => {
+        //   modal.style.display = "none";
+        //   colorBoxes.forEach((box) => {
+        //     const rgbColor = getComputedStyle(box).backgroundColor;
+        //     for (let i = 0; i < Object.keys(uniqueHexColors).length; i++) {
+        //       const deltaValue = differenceBetweenTwoColor(
+        //         chroma(`${rgbColor}`),
+        //         chroma(Object.keys(uniqueHexColors)[i])
+        //       );
+        //       if (deltaValue < 17) {
+        //         box.innerHTML =
+        //           uniqueHexColors[Object.keys(uniqueHexColors)[i]];
+        //       }
+        //     }
+        //   });
+        // });
         let row = 1;
         let column = 1;
         const selectRowBtn = document.querySelector(".selectRow");
