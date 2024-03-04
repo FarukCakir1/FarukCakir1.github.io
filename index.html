@@ -407,16 +407,16 @@
           modal.style.display = "none";
           colorBoxes.forEach((box) => {
             const hex = box.getAttribute("hex");
-            let Ccode = "";
+            let code = "";
             if (
               uniqueHexColors.find(
                 (color) => color.hex.toUpperCase() === hex.toUpperCase()
               )
             ) {
-              Ccode = uniqueHexColors.find((color) => color.hex === hex).code;
+              code = uniqueHexColors.find((color) => color.hex === hex).code;
             }
 
-            box.innerHTML = Ccode;
+            box.innerHTML = code;
           });
         });
 
