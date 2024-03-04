@@ -35,6 +35,8 @@
         height: 70px;
         display: flex;
         color: white;
+        align-items: center;
+        justify-content: center;
       }
 
       .assignInput {
@@ -86,10 +88,16 @@
         bottom: 50px;
         right: 50px;
       }
+      .seeRal {
+        position: fixed;
+        z-index: 99999999;
+        bottom: 50px;
+        right: 150px;
+      }
     </style>
   </head>
   <body>
-    <img src="example.jpg" id="image" style="display: none" />
+    <img src="test2.jpg" id="image" style="display: none" />
     <div
       style="
         position: absolute;
@@ -101,7 +109,7 @@
         display: none;
       "
     ></div>
-    <!-- <div class="assigModalWrapper">
+    <div class="assigModalWrapper">
       <div class="assigModal">
         <div class="colorBoxesWrapper"></div>
         <div class="input-wrapper"></div>
@@ -118,8 +126,9 @@
           Assign
         </button>
       </div>
-    </div> -->
+    </div>
     <button class="selectRow">Satır Seç</button>
+    <button class="seeRal">RAL Renklerini gör</button>
     <div class="selectRowWrapper" style="display: none">
       <div
         class="inputWrapper"
@@ -139,7 +148,64 @@
       const image = document.getElementById("image");
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
-      const uniqueHexColors = {};
+      let uniqueHexColors = [
+        {
+          hex: "#241a11",
+          quantity: 0,
+          ral: "",
+          ralHex: "",
+        },
+      ];
+      const ralCodes = {
+        "#221B11": {
+          hex: "#3D3B3A",
+          ral: "RAL 8022",
+        },
+        "#41321D": {
+          hex: "#57483F",
+          ral: "RAL 8014",
+        },
+        "#5C3F21": {
+          hex: "#785441",
+          ral: "RAL 8007",
+        },
+        "#6C5938": {
+          hex: "#7D6A4E",
+          ral: "RAL 7008",
+        },
+        "#6C5939": {
+          hex: "#7D6A4E",
+          ral: "RAL 7008",
+        },
+        "#876438": {
+          hex: "#8B7047",
+          ral: "RAL 1036",
+        },
+        "#876538": {
+          hex: "#8B7047",
+          ral: "RAL 1036",
+        },
+        "#A58552": {
+          hex: "#B3885D",
+          ral: "RAL 1011",
+        },
+        "#734E24": {
+          hex: "#865A41",
+          ral: "RAL 8003",
+        },
+        "#734E23": {
+          hex: "#865A41",
+          ral: "RAL 8003",
+        },
+        "#BF9E69": {
+          hex: "#BD955A",
+          ral: "RAL 1024",
+        },
+        "#D9BF8C": {
+          hex: "#CDBA88",
+          ral: "RAL 1000",
+        },
+      };
       let color = "";
       // rgb to hex
       function rgbToHex(r, g, b) {
@@ -167,6 +233,7 @@
         return colorDifference;
       }
 
+      //#region hex converter and difference calculator
       function hexToRgb(hex) {
         // Hex kodunu # ile başlıyorsa kaldır
         let cleanHex = hex.replace("#", "");
@@ -178,30 +245,25 @@
         return { r, g, b };
       }
 
-      // catch similiar colors
-      function hexColorDelta(hex1, hex2) {
-        let rgb1 = hexToRgb(hex1);
-        let rgb2 = hexToRgb(hex2);
+      // // catch similiar colors
+      // function hexColorDelta(hex1, hex2) {
+      //   let rgb1 = hexToRgb(hex1);
+      //   let rgb2 = hexToRgb(hex2);
 
-        // RGB değerleri arasındaki farkın karesini al
-        let rDiff = (rgb1.r - rgb2.r) ** 2;
-        let gDiff = (rgb1.g - rgb2.g) ** 2;
-        let bDiff = (rgb1.b - rgb2.b) ** 2;
+      //   // RGB değerleri arasındaki farkın karesini al
+      //   let rDiff = (rgb1.r - rgb2.r) ** 2;
+      //   let gDiff = (rgb1.g - rgb2.g) ** 2;
+      //   let bDiff = (rgb1.b - rgb2.b) ** 2;
 
-        // Euclidean uzaklık formülünü kullan
-        let distance = Math.sqrt(rDiff + gDiff + bDiff);
+      //   // Euclidean uzaklık formülünü kullan
+      //   let distance = Math.sqrt(rDiff + gDiff + bDiff);
 
-        // Daha küçük değerler daha benzer renkler anlamına gelir
-        return distance;
-      }
+      //   // Daha küçük değerler daha benzer renkler anlamına gelir
+      //   return distance;
+      // }
+      //#endregion
 
       image.onload = function () {
-        console.log(
-          differenceBetweenTwoColor(
-            chroma("rgb(91, 72, 42)"),
-            chroma("rgb(110, 88, 53)")
-          )
-        );
         canvas.width = image.width;
         canvas.height = image.height;
         context.drawImage(image, 0, 0, image.width, image.height);
@@ -209,6 +271,7 @@
         wrapper.classList.add("frame");
         wrapper.style.width = `${image.width}px`;
         document.body.appendChild(wrapper);
+        // document.body.appendChild(canvas);
         let xPos = 1;
         let yPos = 1;
         for (let y = 0; y < image.height; y += image.height / 100) {
@@ -217,28 +280,31 @@
               willReadFrequently: true,
             }).data;
             const hexColor = rgbToHex(pixel[0], pixel[1], pixel[2]);
-            let isDeltaOK = true;
-            Object.keys(uniqueHexColors).forEach((uniqueCode) => {
-              const delta = differenceBetweenTwoColor(
-                chroma(`rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`),
-                chroma(uniqueCode)
-              );
-              if (delta < 5) {
-                isDeltaOK = false;
-                return;
-              }
-            });
-            if (!uniqueHexColors.hasOwnProperty(hexColor) && isDeltaOK) {
-              uniqueHexColors[`rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`] =
-                "";
+            let ralCode = null;
+            if (ralCodes.hasOwnProperty(hexColor.toUpperCase()))
+              ralCode = ralCodes[`${hexColor.toUpperCase()}`].ral;
+            if (!uniqueHexColors.find((color) => color.hex === hexColor)) {
+              uniqueHexColors.push({
+                hex: hexColor,
+                quantity: 0,
+                ral: ralCode || "",
+                ralHex: "",
+                code: "",
+              });
+            } else {
+              uniqueHexColors.find((color) => color.hex === hexColor)
+                .quantity++;
             }
             const singlePix = document.createElement("span");
             singlePix.classList.add("singlePix");
             singlePix.style.width = `${image.width / 58}px`;
             singlePix.style.height = `${image.height / 100}px`;
-            singlePix.style.background = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
+            // singlePix.style.background = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
+            singlePix.style.background = hexColor;
             singlePix.setAttribute("xPos", xPos);
             singlePix.setAttribute("yPos", yPos);
+            singlePix.setAttribute("hex", hexColor);
+            //#region single box color assigner
             singlePix.addEventListener("click", (e) => {
               color = getComputedStyle(e.target).background;
               const wrapper = document.querySelector(".customizeWrapper");
@@ -254,26 +320,51 @@
               done.addEventListener("click", () => {
                 boxes.forEach((box) => {
                   if (getComputedStyle(box).background === color) {
-                    console.log(color, getComputedStyle(box).background);
                     box.innerHTML = newVal;
                   }
                 });
                 wrapper.style.display = "none";
               });
             });
+            //#endregion
             wrapper.appendChild(singlePix);
             xPos++;
           }
           xPos = 1;
           yPos++;
         }
+        const colorBoxes = document.querySelectorAll(".singlePix");
+        uniqueHexColors = uniqueHexColors.filter(
+          (color) => color.quantity > 80
+        );
+        console.log(uniqueHexColors);
+        colorBoxes.forEach((box) => {
+          const hex = box.getAttribute("hex");
+          const rgb = hexToRgb(hex);
+          let value = 9999;
+          if (!uniqueHexColors.find((color) => color.hex === hex)) {
+            for (let i = 0; i < uniqueHexColors.length; i++) {
+              const uniqueHex = uniqueHexColors[i].hex;
+              const uniqueRgb = hexToRgb(uniqueHex);
+              const difference = differenceBetweenTwoColor(
+                chroma(`rgb(${uniqueRgb.r}, ${uniqueRgb.g}, ${uniqueRgb.b})`),
+                chroma(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`)
+              );
+              if (difference < 7) {
+                box.style.backgroundColor = uniqueHexColors[i].hex;
+                box.setAttribute("hex", uniqueHexColors[i].hex);
+              }
+            }
+          }
+        });
+        //#region decrease colors amount
         // let hexCodeArray = Object.keys(uniqueHexColors);
         // console.log(hexCodeArray);
         // let spliceStartValue = 0;
-        // let deltaValueComparer = 10;
+        // let deltaValueComparer = 2;
         // while (hexCodeArray.length > 13) {
         //   spliceStartValue = 0;
-        //   deltaValueComparer += 2;
+        //   deltaValueComparer += 1;
         //   for (let i = 0; i < hexCodeArray.length; i++) {
         //     let spliceEndValue = i === 0 ? i + 1 : i;
         //     const deltaValue = differenceBetweenTwoColor(
@@ -288,87 +379,115 @@
         //     }
         //   }
         // }
+        //#endregion
 
-        // deltaValueComparer += 1;
-
-        console.log(hexCodeArray);
-        // console.log(Object.keys(uniqueHexColors).length);
         const colorBoxWrapper = document.querySelector(".colorBoxesWrapper");
         const inputsWrapper = document.querySelector(".input-wrapper");
-        // for (let i = 0; i < hexCodeArray.length; i++) {
-        //   const colorBox = document.createElement("div");
-        //   colorBox.classList.add("colorBox");
-        //   colorBox.style.display = "flex";
-        //   colorBox.style.backgroundColor = hexCodeArray[i];
-        //   colorBoxWrapper.appendChild(colorBox);
-        //   const assignInput = document.createElement("input");
-        //   assignInput.id = hexCodeArray[i];
-        //   assignInput.classList.add("assignInput");
-        //   inputsWrapper.appendChild(assignInput);
-        //   assignInput.addEventListener("input", (e) => {
-        //     uniqueHexColors[hexCodeArray[i]] = e.target.value;
-        //   });
-        // }
-        // const btn = document.querySelector(".assignBtn");
-        // const modal = document.querySelector(".assigModalWrapper");
-        // const colorBoxes = document.querySelectorAll(".singlePix");
-        // btn.addEventListener("click", () => {
-        //   modal.style.display = "none";
-        //   colorBoxes.forEach((box) => {
-        //     const rgbColor = getComputedStyle(box).backgroundColor;
-        //     for (let i = 0; i < Object.keys(uniqueHexColors).length; i++) {
-        //       const deltaValue = differenceBetweenTwoColor(
-        //         chroma(`${rgbColor}`),
-        //         chroma(Object.keys(uniqueHexColors)[i])
-        //       );
-        //       if (deltaValue < 17) {
-        //         box.innerHTML =
-        //           uniqueHexColors[Object.keys(uniqueHexColors)[i]];
-        //       }
-        //     }
-        //   });
-        // });
-        let row = 1;
-        let column = 1;
-        const selectRowBtn = document.querySelector(".selectRow");
-        const input = document.querySelector(".rowSelectInput");
-        input.addEventListener("input", (e) => {
-          row = e.target.value;
-          column = 1;
-        });
-        selectRowBtn.addEventListener("click", () => {
-          const donebtn = document.querySelector(".done");
-          const wrapper = document.querySelector(".selectRowWrapper");
-          const inputWrapper = document.querySelector(".inputWrapper");
+        for (let i = 0; i < uniqueHexColors.length; i++) {
+          const colorBox = document.createElement("div");
+          colorBox.classList.add("colorBox");
+          colorBox.style.display = "flex";
+          colorBox.style.backgroundColor = uniqueHexColors[i].hex;
+          if (ralCodes.hasOwnProperty(uniqueHexColors[i].hex.toUpperCase())) {
+            colorBox.innerHTML =
+              ralCodes[`${uniqueHexColors[i].hex.toUpperCase()}`].ral;
+          }
+          colorBoxWrapper.appendChild(colorBox);
+          const assignInput = document.createElement("input");
+          assignInput.id = uniqueHexColors[i].hex;
+          assignInput.classList.add("assignInput");
+          inputsWrapper.appendChild(assignInput);
+          assignInput.addEventListener("input", (e) => {
+            uniqueHexColors[i].code = e.target.value;
+          });
+        }
+        const btn = document.querySelector(".assignBtn");
+        const modal = document.querySelector(".assigModalWrapper");
+        btn.addEventListener("click", () => {
+          modal.style.display = "none";
+          colorBoxes.forEach((box) => {
+            const hex = box.getAttribute("hex");
+            let Ccode = "";
+            if (
+              uniqueHexColors.find(
+                (color) => color.hex.toUpperCase() === hex.toUpperCase()
+              )
+            ) {
+              Ccode = uniqueHexColors.find((color) => color.hex === hex).code;
+            }
 
-          console.log(getComputedStyle(inputWrapper).display);
-
-          inputWrapper.style.display = "flex";
-
-          wrapper.style.display = "flex";
-          donebtn.addEventListener("click", () => {
-            inputWrapper.style.display = "none";
-            colorBoxes.forEach((box) => {
-              box.style.zIndex = "0";
-              if (box.getAttribute("ypos") == row) {
-                box.style.zIndex = "99999";
-              }
-            });
+            box.innerHTML = code;
           });
         });
-        document.body.onkeyup = function (e) {
-          const selectedRow = document.querySelectorAll(`[ypos="${row}"]`);
-          if (e.key == " " || e.code == "Enter") {
-            selectedRow.forEach((box) => {
-              if (box.getAttribute("xpos") == column) {
-                box.innerHTML = "Boyandı";
-              }
-            });
-            column++;
-          }
-        };
+
+        const seeRalBtn = document.querySelector(".seeRal");
+        seeRalBtn.addEventListener("click", () => {
+          colorBoxes.forEach((box) => {
+            const hex = box.getAttribute("hex");
+            console.log(hex.toUpperCase());
+            if (ralCodes.hasOwnProperty(hex.toUpperCase())) {
+              const ralHex = ralCodes[`${hex.toUpperCase()}`].hex;
+              box.style.backgroundColor = ralHex;
+            }
+          });
+        });
+        //#region scroll selected row
+        // let row = 1;
+        // let column = 1;
+        // const selectRowBtn = document.querySelector(".selectRow");
+        // const input = document.querySelector(".rowSelectInput");
+        // input.addEventListener("input", (e) => {
+        //   row = e.target.value;
+        //   column = 1;
+        //   window.scrollTo({
+        //     behavior: "smooth",
+        //     top: row * 120 - 120,
+        //     left: 0,
+        //   });
+        // });
+        //#endregion
+        //#region  select row func
+        // selectRowBtn.addEventListener("click", () => {
+        //   const donebtn = document.querySelector(".done");
+        //   const wrapper = document.querySelector(".selectRowWrapper");
+        //   const inputWrapper = document.querySelector(".inputWrapper");
+
+        //   console.log(getComputedStyle(inputWrapper).display);
+
+        //   inputWrapper.style.display = "flex";
+
+        //   wrapper.style.display = "flex";
+        //   donebtn.addEventListener("click", () => {
+        //     inputWrapper.style.display = "none";
+        //     colorBoxes.forEach((box) => {
+        //       box.style.zIndex = "0";
+        //       if (box.getAttribute("ypos") == row) {
+        //         box.style.zIndex = "99999";
+        //       }
+        //     });
+        //   });
+        // });
+        //#endregion
+        //#region set painted func
+        // document.body.onkeyup = function (e) {
+        //   const selectedRow = document.querySelectorAll(`[ypos="${row}"]`);
+        //   if (e.key == " " || e.code == "Enter") {
+        //     selectedRow.forEach((box) => {
+        //       if (box.getAttribute("xpos") == column) {
+        //         box.innerHTML = "Boyandı";
+        //         window.scrollTo({
+        //           behavior: "smooth",
+        //           top: window.scrollY,
+        //           left: column * 117,
+        //         });
+        //       }
+        //     });
+        //     column++;
+        //   }
+        // };
+        //#endregion
       };
-      image.src = "example.jpg";
+      image.src = "test2.jpg";
       image.crossOrigin = "Anonymous";
     </script>
   </body>
