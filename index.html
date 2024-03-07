@@ -45,14 +45,21 @@
       }
 
       .colorBoxesWrapper,
-      .input-wrapper {
+      .input-wrapper,
+      .quantity-wrapper {
         padding: 10px;
         max-width: 100%;
         display: flex;
         flex-direction: column;
         gap: 10px;
       }
-
+      .quantity-wrapper span {
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
       .assigModalWrapper,
       .customizeWrapper {
         position: fixed;
@@ -113,6 +120,7 @@
       <div class="assigModal">
         <div class="colorBoxesWrapper"></div>
         <div class="input-wrapper"></div>
+        <div class="quantity-wrapper"></div>
         <button
           class="assignBtn"
           style="
@@ -299,11 +307,12 @@
             singlePix.classList.add("singlePix");
             singlePix.style.width = `${image.width / 58}px`;
             singlePix.style.height = `${image.height / 100}px`;
-            // singlePix.style.background = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
+            // singlePix.style.background = `transparent`;
             singlePix.style.background = hexColor;
             singlePix.setAttribute("xPos", xPos);
             singlePix.setAttribute("yPos", yPos);
             singlePix.setAttribute("hex", hexColor);
+            singlePix.innerHTML = hexColor;
             //#region single box color assigner
             singlePix.addEventListener("click", (e) => {
               color = getComputedStyle(e.target).background;
@@ -350,9 +359,10 @@
                 chroma(`rgb(${uniqueRgb.r}, ${uniqueRgb.g}, ${uniqueRgb.b})`),
                 chroma(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`)
               );
-              if (difference < 7) {
+              if (difference < 10) {
                 box.style.backgroundColor = uniqueHexColors[i].hex;
                 box.setAttribute("hex", uniqueHexColors[i].hex);
+                uniqueHexColors[i].quantity++;
               }
             }
           }
@@ -383,6 +393,7 @@
 
         const colorBoxWrapper = document.querySelector(".colorBoxesWrapper");
         const inputsWrapper = document.querySelector(".input-wrapper");
+        const quantityWrapper = document.querySelector(".quantity-wrapper");
         for (let i = 0; i < uniqueHexColors.length; i++) {
           const colorBox = document.createElement("div");
           colorBox.classList.add("colorBox");
@@ -397,6 +408,9 @@
           assignInput.id = uniqueHexColors[i].hex;
           assignInput.classList.add("assignInput");
           inputsWrapper.appendChild(assignInput);
+          const quantity = document.createElement("span");
+          quantity.innerHTML = uniqueHexColors[i].quantity;
+          quantityWrapper.appendChild(quantity);
           assignInput.addEventListener("input", (e) => {
             uniqueHexColors[i].code = e.target.value;
           });
@@ -424,68 +438,64 @@
         seeRalBtn.addEventListener("click", () => {
           colorBoxes.forEach((box) => {
             const hex = box.getAttribute("hex");
-            console.log(hex.toUpperCase());
             if (ralCodes.hasOwnProperty(hex.toUpperCase())) {
               const ralHex = ralCodes[`${hex.toUpperCase()}`].hex;
               box.style.backgroundColor = ralHex;
             }
           });
         });
-        //#region scroll selected row
-        // let row = 1;
-        // let column = 1;
-        // const selectRowBtn = document.querySelector(".selectRow");
-        // const input = document.querySelector(".rowSelectInput");
-        // input.addEventListener("input", (e) => {
-        //   row = e.target.value;
-        //   column = 1;
-        //   window.scrollTo({
-        //     behavior: "smooth",
-        //     top: row * 120 - 120,
-        //     left: 0,
-        //   });
-        // });
-        //#endregion
-        //#region  select row func
-        // selectRowBtn.addEventListener("click", () => {
-        //   const donebtn = document.querySelector(".done");
-        //   const wrapper = document.querySelector(".selectRowWrapper");
-        //   const inputWrapper = document.querySelector(".inputWrapper");
 
-        //   console.log(getComputedStyle(inputWrapper).display);
+        let row = 1;
+        let column = 1;
+        const selectRowBtn = document.querySelector(".selectRow");
+        const input = document.querySelector(".rowSelectInput");
+        input.addEventListener("input", (e) => {
+          row = e.target.value;
+          column = 1;
+          window.scrollTo({
+            behavior: "smooth",
+            top: row * 120 - 120,
+            left: 0,
+          });
+        });
 
-        //   inputWrapper.style.display = "flex";
+        selectRowBtn.addEventListener("click", () => {
+          const donebtn = document.querySelector(".done");
+          const wrapper = document.querySelector(".selectRowWrapper");
+          const inputWrapper = document.querySelector(".inputWrapper");
 
-        //   wrapper.style.display = "flex";
-        //   donebtn.addEventListener("click", () => {
-        //     inputWrapper.style.display = "none";
-        //     colorBoxes.forEach((box) => {
-        //       box.style.zIndex = "0";
-        //       if (box.getAttribute("ypos") == row) {
-        //         box.style.zIndex = "99999";
-        //       }
-        //     });
-        //   });
-        // });
-        //#endregion
-        //#region set painted func
-        // document.body.onkeyup = function (e) {
-        //   const selectedRow = document.querySelectorAll(`[ypos="${row}"]`);
-        //   if (e.key == " " || e.code == "Enter") {
-        //     selectedRow.forEach((box) => {
-        //       if (box.getAttribute("xpos") == column) {
-        //         box.innerHTML = "Boyandı";
-        //         window.scrollTo({
-        //           behavior: "smooth",
-        //           top: window.scrollY,
-        //           left: column * 117,
-        //         });
-        //       }
-        //     });
-        //     column++;
-        //   }
-        // };
-        //#endregion
+          console.log(getComputedStyle(inputWrapper).display);
+
+          inputWrapper.style.display = "flex";
+
+          wrapper.style.display = "flex";
+          donebtn.addEventListener("click", () => {
+            inputWrapper.style.display = "none";
+            colorBoxes.forEach((box) => {
+              box.style.zIndex = "0";
+              if (box.getAttribute("ypos") == row) {
+                box.style.zIndex = "99999";
+              }
+            });
+          });
+        });
+
+        document.body.onkeyup = function (e) {
+          const selectedRow = document.querySelectorAll(`[ypos="${row}"]`);
+          if (e.key == " " || e.code == "Enter") {
+            selectedRow.forEach((box) => {
+              if (box.getAttribute("xpos") == column) {
+                box.innerHTML = "Boyandı";
+                window.scrollTo({
+                  behavior: "smooth",
+                  top: window.scrollY,
+                  left: column * 117,
+                });
+              }
+            });
+            column++;
+          }
+        };
       };
       image.src = "test2.jpg";
       image.crossOrigin = "Anonymous";
